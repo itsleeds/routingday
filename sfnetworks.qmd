@@ -1,0 +1,66 @@
+---
+format: gfm
+---
+
+```{r}
+library(sfnetworks)
+library(sf)
+library(tidygraph)
+library(tidyverse)
+sf::sf_use_s2(FALSE)
+```
+
+
+```{r}
+od_geo = sf::read_sf("input_data/od_data_100_sf.geojson")
+zones = sf::read_sf("input_data/zones_msoa_leeds.geojson")
+study_area = zones |> 
+  sf::st_union() |> 
+  sf::st_buffer(0.00001)
+plot(study_area)
+osm_leeds = osmextract::oe_get("west-yorkshire", boundary = study_area, boundary_type = "clipsrc", force_vectortranslate = TRUE)
+osm_leeds_net = osmextract::oe_get_network("west-yorkshire", boundary = study_area, boundary_type = "clipsrc", force_vectortranslate = TRUE)
+osm_leeds_net |> 
+  sf::st_geometry() |> 
+  plot()
+```
+
+Connect disconnected bits with GRASS:
+
+```{r}
+
+```
+
+
+Convert to sfn:
+
+```{r}
+net = osm_leeds_net |> 
+  sf::st_cast("LINESTRING") |> 
+  as_sfnetwork(directed = FALSE) |>
+  # st_transform(27700) |>
+  activate("edges") |>
+  mutate(weight = edge_length())
+
+net = net |> 
+  activate("edges") |>
+  filter(!edge_is_multiple()) |>
+  filter(!edge_is_loop()) |>
+  # remove isolated paths:
+  activate(nodes) |> 
+  filter(!node_is_isolated())
+
+```
+
+
+```{r}
+# Routing between 2 points:
+p1 = od_geo |> 
+  slice(1) |> 
+  lwgeom::st_startpoint()
+p2 = od_geo |> 
+  slice(1) |> 
+  lwgeom::st_endpoint()
+paths = st_network_paths(net, from = p1, to = c(p2), weights = "weight")
+```
+
