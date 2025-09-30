@@ -1,21 +1,25 @@
 ---
 title: "OTP benchmark"
-format: gfm
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{test_otp}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r}
 #| label: packages
 #| message: false
-options(repos = c(CRAN = "https://cloud.r-project.org"))
-if (!require("remotes")) install.packages("remotes")
-pkgs = c(
-    "sf",
-    "tidyverse",
-    "osmextract",
-    "lwgeom",
-    "opentripplanner"
-)
-remotes::install_cran(pkgs)
+# options(repos = c(CRAN = "https://cloud.r-project.org"))
+# if (!require("remotes")) install.packages("remotes")
+# pkgs = c(
+#     "sf",
+#     "tidyverse",
+#     "osmextract",
+#     "lwgeom",
+#     "opentripplanner"
+# )
+# remotes::install_cran(pkgs)
 sapply(pkgs, require, character.only = TRUE)
 ```
 
@@ -24,7 +28,7 @@ The following code is to test the performance of the OTP routing engine running 
 We will read the OD data produced for this test
 ```{r}
 #| label: read-data
-od_geo = sf::read_sf("input_data/od_data_100_sf.geojson")
+od_geo = sf::read_sf(system.file("input_data/od_data_100_sf.geojson", package = "routingday"))
 ```
 
 Extracting Origins and Destinations with the `'lwgeom` package
@@ -49,28 +53,28 @@ The following codes will prepare the folders and files that are required for the
 We create a folder for the Leeds, which will be used as a router in the OTP functions
 ```{r}
 #| label: dir-create
-dir.create("OTP/graphs/Leeds",recursive = T,showWarnings = F)
+dir.create("inst/OTP/graphs/Leeds",recursive = T,showWarnings = F)
 ```
 
 Using the `osmextract` package we can extract the OSM data
 ```{r}
 #| label: osm-get
 leeds_osm <- osmextract::oe_get("Leeds",
-                                download_directory = "OTP/graphs/Leeds")
+                                download_directory = "inst/OTP/graphs/Leeds")
 ```
 
 Specifying the paths
 
 ```{r}
 #| label: dir-paths
-path_data <- file.path("OTP")
+path_data <- file.path("inst/OTP")
 path_otp <- otp_dl_jar(path_data,cache = T)
 ```
 
 Creating the config file for the router. For this purpose we are going to use the default values
 ```{r}
 #| label: setup-router
-if(!file.exists("OTP/graphs/leeds/router-config.json")){
+if(!file.exists("inst/OTP/graphs/leeds/router-config.json")){
 router_config <- otp_make_config("router")
 otp_validate_config(router_config)
 # router_config$routingDefaults$triangleSafetyFactor ### For quietness optimisation
@@ -86,7 +90,7 @@ we built the graph with the following code.
 
 ```{r}
 #| label: graph-prep
-if(!file.exists("OTP/graphs/leeds/Graph.obj")){
+if(!file.exists("inst/OTP/graphs/leeds/Graph.obj")){
 log1 <- otp_build_graph(otp = path_otp,router = "Leeds", dir = path_data,memory = 15000)
 }
 ```
@@ -117,7 +121,3 @@ A quick look at the result
 #| label: plot-routes
 plot(routes2[,"geometry"])
 ```
-
-
-
-

@@ -1,0 +1,31 @@
+Package: routingday
+Title: Routing Day Package
+Version: 0.0.0.9000
+Authors@R: person("Robin", "Lovelace", email = "r.lovelace@leeds.ac.uk", role = c("aut", "cre"))
+Description: A package to reproduce the results of the routing day event.
+License: MIT
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Imports:
+    tidyverse,
+    sf,
+    stplanr,
+    cyclestreets,
+    osrm,
+    dodgr,
+    osmdata,
+    lwgeom,
+    tmap,
+    simodels,
+    od,
+    osmextract,
+    opentripplanner,
+    purrr
+Suggests:
+    knitr,
+    rmarkdown,
+    remotes
+Remotes:
+    ITSLeeds/simodels,
+    ITSLeeds/od
+VignetteBuilder: knitr

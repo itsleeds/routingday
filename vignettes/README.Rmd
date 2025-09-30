@@ -1,10 +1,13 @@
 ---
-format: gfm
+title: "Transport Data Mini Hack: Routing Engines"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{README}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-# Transport Data Mini Hack: Routing Engines
-
- As part of the the [Network Planning Tool for Scotland](https://nptscot.github.io) project, we are looking to explore different options for routing and associated data processing tasks.
+As part of the the [Network Planning Tool for Scotland](https://nptscot.github.io) project, we are looking to explore different options for routing and associated data processing tasks.
 
 We'll run this session in 1 pars:
 
@@ -31,26 +34,6 @@ We will set-up Microsoft Teams for anyone to contribute remotely.
 - Ease of customising routing weights
 - Network pre-processing, with reference to existing documentation, e.g. from [sDNA](https://sdna-plus.readthedocs.io/en/latest/network_preparation.html)
 
-## Logistics
-
-We have in-person space at the University of Leeds from 10:00, get in touch if you'd like to join remotely or in person if you don't know where to find us.
-
-## Sharing code
-
-You can put code whereever you like but please do share reproducible examples with a link to your code and by putting the code here directly with pull requests to this repository. We will share input datasets in the Releases of this repository.
-
-**Please create issues describing ideas before putting in PRs.**
-
-See specific guidance on opening issues and associated Pull Requests here: https://github.com/ITSLeeds/routingday/blob/main/test_osmnx_rl.md#how-to-contribute-to-the-repo
-
-## Getting started 
-
-To get the input datasets and example code, first install the `gh` command line tool, then run:
-
-```bash
-gh repo clone itsleeds/routingday
-```
-
 ## Input datasets
 
 The input datasets in this repo were created with the following packages:
@@ -66,9 +49,12 @@ You can get this in some countries (UK, Republic of Ireland, USA for example) fr
 You can also simulate it (e.g. for travel to school, shops and other purposes) and that could be a topic for your hack, although the main focus is on routing. 
 In the NPT project we use Census data for travel to work and data on travel to school for school travel. We simulate travel to shops, leisure and personal trips with a spatial interaction model.
 
+To generate the data, you can run the following code:
+
 ```{r}
 #| eval: false
-remotes::install_dev("simodels")
+# remotes::install_github("ITSLeeds/simodels") # in DESCRIPTION
+# remotes::install_github("ITSLeeds/od") # in DESCRIPTION
 od_data_leeds = simodels::si_od_census
 names(od_data_leeds)
 od_data_leeds = od_data_leeds |>
@@ -80,28 +66,19 @@ od_data_100 = od_data_leeds |>
   sample_n(100, weight = all)
 od_data_100_sf = od::od_to_sf(od_data_100, zones_msoa_leeds)
 # Save to input_data folder:
-dir.create("input_data")
-sf::write_sf(zones_msoa_leeds, "input_data/zones_msoa_leeds.geojson", delete_dsn = TRUE)
-sf::write_sf(od_data_100_sf, "input_data/od_data_100_sf.geojson", delete_dsn = TRUE)
-readr::write_csv(od_data_100, "input_data/od_data_100.csv")
+dir.create("inst/input_data")
+sf::write_sf(zones_msoa_leeds, "inst/input_data/zones_msoa_leeds.geojson", delete_dsn = TRUE)
+sf::write_sf(od_data_100_sf, "inst/input_data/od_data_100_sf.geojson", delete_dsn = TRUE)
+readr::write_csv(od_data_100, "inst/input_data/od_data_100.csv")
 ```
 
 We can read-in and visualise the data with R as follows:
 
 ```{r}
 #| label: input-data-leeds-base
-od_geo = sf::read_sf("input_data/od_data_100_sf.geojson")
+od_geo = sf::read_sf(system.file("input_data/od_data_100_sf.geojson", package = "routingday"))
 plot(od_geo)
 ```
-
-Let's visualise the OD data in Python:
-
-```{python}
-import geopandas as gpd
-od_gdf = gpd.read_file("input_data/od_data_100_sf.geojson")
-od_gdf.plot()
-```
-
 
 ## Basic routing
 
@@ -118,14 +95,14 @@ routes_1 = route(
     route_fun = cyclestreets::journey,
     plan = "fastest"
 )
-sf::write_sf(routes_1, "input_data/routes_1.geojson", delete_dsn = TRUE)
+sf::write_sf(routes_1, "inst/input_data/routes_1.geojson", delete_dsn = TRUE)
 ```
 
 We can visualise the route data as follows:
 
 ```{r}
 #| label: routes_1
-routes_1 = sf::read_sf("input_data/routes_1.geojson")
+routes_1 = sf::read_sf(system.file("input_data/routes_1.geojson", package = "routingday"))
 names(routes_1)
 nrow(routes_1)
 routes_1 |>
@@ -133,14 +110,6 @@ routes_1 |>
   plot()
 #   tm_shape() +
 #   tm_lines("all")
-```
-
-
-```{python}
-#| label: routes_1_py
-import geopandas as gpd
-routes_1_gdf = gpd.read_file("input_data/routes_1.geojson")
-routes_1_gdf.plot();
 ```
 
 There are many ways to generate routes but few are easy.
@@ -179,13 +148,13 @@ routes_quietest = route(
     route_fun = cyclestreets::journey,
     plan = "quietest"
 )
-sf::write_sf(routes_quietest, "input_data/routes_quietest.geojson", delete_dsn = TRUE)
+sf::write_sf(routes_quietest, "inst/input_data/routes_quietest.geojson", delete_dsn = TRUE)
 ```
 
 
 ```{r}
 #| label: routes_quietest
-routes_quietest = sf::read_sf("input_data/routes_quietest.geojson")
+routes_quietest = sf::read_sf(system.file("input_data/routes_quietest.geojson", package = "routingday"))
 names(routes_quietest)
 nrow(routes_quietest)
 routes_quietest |>
@@ -198,27 +167,3 @@ routes_quietest |>
 ### Batch routing
 
 You can use the function `cyclestreets::batch()` for batch routing that gives around a 10x speed-up.
-
-# Routing using a local copy of OSM
-
-...
-
-## Notes
-
-See the qmd for the source code that generated README.md: to check you have R and Python installed you can try to reproduce it with:
-
-```bash
-quarto render README.qmd
-```
-
-See the source code for scripts to convert the .qmd file to .R and .py files.
-
-```{r}
-#| eval: false
-#| echo: false
-# Generate .R file from this:
-knitr::purl("README.qmd")
-# Generate .py file from this:
-system("pip install jupytext")
-system("jupytext --to py README.qmd")
-```

@@ -1,6 +1,10 @@
 ---
 title: "OSRM first go"
-format: gfm
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{osrm_firstgo}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 This focuses on setting a basic local OSRM routing server using the default bicycle profile. Anyone is free to go further to potentially explore the modification of profiles.
@@ -73,7 +77,7 @@ For this example, we use the OD data generated in the `README` file. So, we read
 
 ```{r}
 # Read OD points
-od_geo <- sf::st_read("input_data/od_data_100_sf.geojson")
+od_geo <- sf::st_read(system.file("input_data/od_data_100_sf.geojson", package = "routingday"))
 ```
 
 Next, I prepare the OD into a suitable format to pass it to OSRM. 
@@ -115,4 +119,3 @@ This takes about 1.1 in the quarto environment, and the results look like this:
 ```{r}
 plot(osrm_routes[,3])
 ```
-

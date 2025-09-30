@@ -1,15 +1,13 @@
 ---
-format: gfm
+title: "How to contribute"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{How to contribute}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 This is an example of a Quarto file for an idea.
-
-
-```{python}
-import osmnx as ox
-# Read-in OSM data for a 1 km radius around Leeds:
-
-```
 
 ## How to contribute to the repo
 
