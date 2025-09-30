@@ -62,7 +62,7 @@ With the instance active we go to R and specify the local host on `osrm`.
 
 So, we set the local host. 
 
-```{r}
+```{r, eval=FALSE}
 # Set environment variable to avoid fork safety issues on macOS
 Sys.setenv(OBJC_DISABLE_INITIALIZE_FORK_SAFETY = "YES")
 

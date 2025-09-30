@@ -1,3 +1,4 @@
+#' @export
 path_to_sf <- function(dp, verts, simplify = FALSE) {
   # Check for emplyr paths
   if (length(dp[[1]]) > 0) {
@@ -18,6 +19,7 @@ path_to_sf <- function(dp, verts, simplify = FALSE) {
   }
 }
 
+#' @export
 paths_to_sf <- function(paths, verts) {
   dp.list <- purrr::map(paths, path_to_sf, verts = verts, .progress = TRUE)
   dp.list <- unname(dp.list)
